@@ -1,13 +1,18 @@
-export enum Locations {
-    LOCATION_DECK=	0x01,		//
-    LOCATION_HAND=	0x02,   	//
-    LOCATION_MZONE	= 0x04,		//
-    LOCATION_SZONE	= 0x08,  	//
-    LOCATION_GRAVE	= 0x10,		//
-    LOCATION_REMOVED= 0x20,		//
-    LOCATION_EXTRA	= 0x40,		//
-    LOCATION_OVERLAY= 0x80,		//
-    LOCATION_ONFIELD= 0x0c,		//
-    LOCATION_FZONE	= 0x100,		//
-    LOCATION_PZONE	= 0x200,		//
+export enum LOCATION {
+    DECK=	0x01,		//
+    HAND=	0x02,   	//
+    MZONE	= 0x04,		//
+    SZONE	= 0x08,  	//
+    GRAVE	= 0x10,		//
+    REMOVED= 0x20,		//
+    EXTRA	= 0x40,		//
+    OVERLAY= 0x80,		//
+    ONFIELD= 0x0c,		//
+    FZONE	= 0x100,		//
+    PZONE	= 0x200,		//
+}
+
+export enum PLAYER {
+    NONE = 2,
+    ALL = 3,
 }

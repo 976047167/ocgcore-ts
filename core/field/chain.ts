@@ -1,5 +1,5 @@
 import { Card } from "../card/card";
-import { Locations } from "../common";
+import { LOCATION } from "../common";
 export class Chain {
     public static chainOperationSort(c1: Chain, c2: Chain): boolean {
         return c1.triggeringEffect.id < c2.triggeringEffect.id;
@@ -24,13 +24,11 @@ export class Chain {
     public flag: number;
     public setTriggeringState(pcard: Card) {
         this.triggeringControler = pcard.current.controler;
-        if (pcard.current.isLocation(Locations.LOCATION_FZONE)) {
-            this.triggeringLocation = Locations.LOCATION_SZONE | Locations.LOCATION_FZONE;
-        }
-        else if (pcard.current.isLocation(Locations.LOCATION_PZONE)) {
-            this.triggeringLocation = Locations.LOCATION_SZONE | Locations.LOCATION_PZONE;
-        }
-        else {
+        if (pcard.current.isLocation(LOCATION.FZONE)) {
+            this.triggeringLocation = LOCATION.SZONE | LOCATION.FZONE;
+        } else if (pcard.current.isLocation(LOCATION.PZONE)) {
+            this.triggeringLocation = LOCATION.SZONE | LOCATION.PZONE;
+        } else {
             this.triggeringLocation = pcard.current.location;
         }
         this.triggeringSequence = pcard.current.sequence;
