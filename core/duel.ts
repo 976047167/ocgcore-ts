@@ -1,3 +1,6 @@
-export default class Duel{
+export default class Duel {
 
+    constructor() {
+
+    }
 }

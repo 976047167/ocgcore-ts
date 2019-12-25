@@ -1,5 +1,6 @@
 export class Card {
     public q_cache: QueryCache;
+    public current: CardState;
 
 }
 
