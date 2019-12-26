@@ -11,10 +11,11 @@
     "url": "git+https://github.com/976047167/ocgcore-ts.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "976047167",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/976047167/ocgcore-ts/issues"
   },
-  "homepage": "https://github.com/976047167/ocgcore-ts#readme"
+  "homepage": "https://github.com/976047167/ocgcore-ts#readme",
+  "typings": "./ocgcore.d.ts"
 }

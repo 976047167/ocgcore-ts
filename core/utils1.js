@@ -8,9 +8,11 @@ o.trim().split('\n').forEach(function(v, i) {
     const des ="/**"+v.substr(index+2)+"*/"
     dess.push(des)
 })
-d.split('\n').forEach(function(v, i) {
+o.split('\n').forEach(function(v, i) {
     if(dess[i]){
         console.log("\t"+dess[i])
     }
-    console.log(v)
+    const index = v.lastIndexOf("--")
+    const des =v.substr(0,index)+","
+    console.log(des)
 })

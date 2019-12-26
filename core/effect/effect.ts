@@ -27,7 +27,7 @@ export class Effect {
     public active_type: number;
     public active_location: number;
     public active_sequence: number;
-    public active_handler: Card | undefined;
+    public active_handler: Card;
     public status: number;
     public label: number[];
     public label_object: number;
@@ -36,8 +36,8 @@ export class Effect {
     public target: number;
     public value: number;
     public operation: number;
-    private owner: Card | undefined;
-    private handler: Card | undefined;
+    private owner: Card;
+    private handler!: Card;
     constructor(pd: Duel) {
         this.ref_handle = 0;
         this.pduel = pd;
@@ -122,17 +122,155 @@ export class Effect {
         if (this.type & EFFECT_TYPE.ACTIONS) {
             return false;
         }
+        //
         if ((this.type & (EFFECT_TYPE.SINGLE | EFFECT_TYPE.XMATERIAL)) &&
             !(this.type & EFFECT_TYPE.FIELD)) {
-
+            const phandler = this.get_handler();
+            const powner = this.get_owner();
+            if (phandler.current.controler === PLAYER.NONE) {
+                return false;
+            }
+            if (this.is_flag(EFFECT_FLAG.SINGLE_RANGE) && !this.in_range(phandler)) {
+                return false;
+            }
+            if (this.is_flag(EFFECT_FLAG.SINGLE_RANGE) &&
+                !phandler.get_status(STATUS.EFFECT_ENABLED) &&
+                !this.is_flag(EFFECT_FLAG.IMMEDIATELY_APPLY)) {
+                return false;
+            }
+            if (this.is_flag(EFFECT_FLAG.SINGLE_RANGE) &&
+                (phandler.current.location & LOCATION.ONFIELD) &&
+                !phandler.is_position(POS.FACEUP)) {
+                return false;
+            }
+            if (this.is_flag(EFFECT_FLAG.OWNER_RELATE) &&
+                this.is_can_be_forbidden() &&
+                powner.is_status(STATUS.FORBIDDEN)) {
+                return false;
+            }
+            if (powner === phandler &&
+                this.is_can_be_forbidden() &&
+                phandler.get_status(STATUS.FORBIDDEN)) {
+                return false;
+            }
+            if (this.is_flag(EFFECT_FLAG.OWNER_RELATE) &&
+                !this.is_flag(EFFECT_FLAG.CANNOT_DISABLE) &&
+                powner.is_status(STATUS.DISABLED)) {
+                return false;
+            }
+            if (powner === phandler &&
+                !this.is_flag(EFFECT_FLAG.CANNOT_DISABLE) &&
+                phandler.get_status(STATUS.DISABLED)) {
+                return false;
+            }
         }
-        return false;
+        //
+        if (this.type & EFFECT_TYPE.EQUIP) {
+            if (this.handler.current.controler === PLAYER.NONE) {
+                return false;
+            }
+            if (this.is_flag(EFFECT_FLAG.OWNER_RELATE) &&
+                this.is_can_be_forbidden() &&
+                this.owner.is_status(STATUS.FORBIDDEN)) {
+                return false;
+            }
+            if (this.owner === this.handler &&
+                this.is_can_be_forbidden() &&
+                this.handler.get_status(STATUS.FORBIDDEN)) {
+                return false;
+            }
+            if (this.is_flag(EFFECT_FLAG.OWNER_RELATE) &&
+                !this.is_flag(EFFECT_FLAG.CANNOT_DISABLE) &&
+                this.owner.is_status(STATUS.DISABLED)) {
+                return false;
+            }
+            if (this.owner === this.handler &&
+                !this.is_flag(EFFECT_FLAG.CANNOT_DISABLE) &&
+                this.handler.get_status(STATUS.DISABLED)) {
+                return false;
+            }
+            if (!this.is_flag(EFFECT_FLAG.SET_AVAILABLE)) {
+                if (!(this.handler.get_status(STATUS.EFFECT_ENABLED))) {
+                    return false;
+                }
+                if (!this.handler.is_position(POS.FACEUP)) {
+                    return false;
+                }
+            }
+        }
+        //
+        if (this.type & EFFECT_TYPE.FIELD) {
+            const phandler = this.get_handler();
+            const powner = this.get_owner();
+            if (!this.is_flag(EFFECT_FLAG.FIELD_ONLY)) {
+                if (phandler.current.controler === PLAYER.NONE) {
+                    return false;
+                }
+                if (!this.in_range(phandler)) {
+                    return false;
+                }
+                if (!phandler.get_status(STATUS.EFFECT_ENABLED) &&
+                    !this.is_flag(EFFECT_FLAG.IMMEDIATELY_APPLY)) {
+                    return false;
+                }
+                if ((phandler.current.location & LOCATION.ONFIELD) &&
+                    !phandler.is_position(POS.FACEUP)) {
+                    return false;
+                }
+                if (this.is_flag(EFFECT_FLAG.OWNER_RELATE) &&
+                    this.is_can_be_forbidden() &&
+                    powner.is_status(STATUS.FORBIDDEN)) {
+                    return false;
+                }
+                if (powner === phandler && this.is_can_be_forbidden() &&
+                    phandler.get_status(STATUS.FORBIDDEN)) {
+                    return false;
+                }
+                if (this.is_flag(EFFECT_FLAG.OWNER_RELATE) &&
+                    !this.is_flag(EFFECT_FLAG.CANNOT_DISABLE) &&
+                    powner.is_status(STATUS.DISABLED)) {
+                    return false;
+                }
+                if (powner === phandler &&
+                    !this.is_flag(EFFECT_FLAG.CANNOT_DISABLE) &&
+                    phandler.get_status(STATUS.DISABLED)) {
+                    return false;
+                }
+                if (phandler.is_status(STATUS.BATTLE_DESTROYED)) {
+                    return false;
+                }
+            }
+        }
     }
-    public check_count_limit(playerid: number): number {
-
-        return 0;
+    public check_count_limit(playerid: number): boolean {
+        if (this.is_flag(EFFECT_FLAG.COUNT_LIMIT)) {
+            if (this.count_limit == 0) {
+                return false;
+            }
+            if (this.count_code) {
+                const code = this.count_code & 0xfffffff;
+                const count = this.count_limit_max;
+                if (code == 1) {
+                    if (pduel.game_field.get_effect_code((this.count_code & 0xf0000000) | get_handler() - > fieldid, PLAYER_NONE) >= count) {
+                        return FALSE;
+                    }
+                } else {
+                    if (pduel - > game_field - > get_effect_code(count_code, playerid) >= count) {
+                        return FALSE;
+                    }
+                }
+            }
+        }
+        return TRUE;
     }
-    public is_activateable(playerid: number, e: TEvent, neglect_cond: number = 0, neglect_cost: number = 0, neglect_target: number = 0, neglect_loc: number = 0, neglect_faceup: number = 0): number {
+    public is_activateable(playerid: number,
+                           e: TEvent,
+                           neglect_cond: number = 0,
+                           neglect_cost: number = 0,
+                           neglect_target: number = 0,
+                           neglect_loc: number = 0,
+                           neglect_faceup: number = 0,
+    ): number {
 
         return 0;
     }
@@ -201,27 +339,42 @@ export class Effect {
     public clone(): Effect {
         return this;
     }
-    public get_owner(): Card | undefined {
+    public get_owner(): Card {
+        if (this.active_handler) {
+            return this.active_handler;
+        }
+        if ((this.type & EFFECT_TYPE.XMATERIAL)) {
+            return this.handler.overlay_target;
+        }
         return this.owner;
     }
     public get_owner_player(): number {
         return 0;
     }
-    public get_handler(): Card | undefined {
+    public get_handler(): Card {
+        if (this.active_handler) {
+            return this.active_handler;
+        }
+        if ((this.type & EFFECT_TYPE.XMATERIAL)) {
+            return this.handler.overlay_target;
+        }
         return this.handler;
 
     }
     public get_handler_player(): number {
         return 0;
     }
-    // in_range( pcard:Card):number{
+    public in_range(p: Card | Chain): boolean {
+        if (this.type & EFFECT_TYPE.XMATERIAL) {
+            return !!this.handler.overlay_target;
+        }
+        if (p instanceof Card) {
+            return p.current.isLocation(this.range);
 
-    //     return 0
-    // };
-    // in_range( ch:Chain):number{
-
-    //     return 0
-    // };
+        } else {
+            return !!(this.range & p.triggeringLocation);
+        }
+    }
     public set_activate_location() { }
     public set_active_type() { }
     public get_active_type() {

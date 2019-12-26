@@ -430,9 +430,9 @@ declare enum EFFECT_CODE {
     /**重新指定去向(寶玉獸)*/
     TO_GRAVE_REDIRECT_CB = 313,
     /**設定最終等級(銀河女王之光)*/
-    // CHANGE_LEVEL_FINAL		314
+    // CHANGE_LEVEL_FINAL314
     /**設定最終階級*/
-    // CHANGE_RANK_FINAL		315
+    // CHANGE_RANK_FINAL315
     /**必须作为融合素材*/
     MUST_BE_FMATERIAL = 316,
     /**必须作为超量素材*/
@@ -454,7 +454,7 @@ declare enum EFFECT_CODE {
     /**玩家已受到"效果傷害變成0"的效果影響*/
     NO_DAMAGE = 335,
     /**不能通常召唤的怪獸*/
-    // UNSUMMONABLE_CARD		336
+    // UNSUMMONABLE_CARD336
     /**反制陷阱捨棄手牌的代價改變(解放之阿里阿德涅)*/
     DISCARD_COST_CHANGE = 338,
     /**用手牌的怪獸當作同步素材*/
@@ -476,7 +476,7 @@ declare enum EFFECT_CODE {
     /**旧同盟状态*/
     OLDUNION_STATUS = 348,
     /**reserve*/
-    // ADD_FUSION_ATTRIBUTE		349
+    // ADD_FUSION_ATTRIBUTE349
     /**reserve*/
     // REMOVE_FUSION_ATTRIBUTE	350,
     /**用作融合素材时的属性*/
@@ -720,76 +720,159 @@ declare enum EFFECT_TYPE {
  * 效果的特殊性质
  */
 declare enum EFFECT_FLAG {
-	/**可以发动的*/
+    /**可以发动的*/
     INITIAL = 0x0001,
-	/**此效果的Value属性是函数*/
+    /**此效果的Value属性是函数*/
     FUNC_VALUE = 0x0002,
-	/**发动次数限制*/
+    /**发动次数限制*/
     COUNT_LIMIT = 0x0004,
-	/**此效果是注册给全局环境的*/
+    /**此效果是注册给全局环境的*/
     FIELD_ONLY = 0x0008,
-	/**取对象效果*/
+    /**取对象效果*/
     CARD_TARGET = 0x0010,
-	/**影响所有区域的卡（禁止令 大宇宙 王宫的铁壁）*/
+    /**影响所有区域的卡（禁止令 大宇宙 王宫的铁壁）*/
     IGNORE_RANGE = 0x0020,
-	/**Target Range不会因为控制权的改变而改变*/
+    /**Target Range不会因为控制权的改变而改变*/
     ABSOLUTE_TARGET = 0x0040,
-	/**无视效果免疫*/
+    /**无视效果免疫*/
     IGNORE_IMMUNE = 0x0080,
-	/**影响场上里侧的卡/裡側狀態可發動*/
+    /**影响场上里侧的卡/裡側狀態可發動*/
     SET_AVAILABLE = 0x0100,
-	/**含有"此效果不會被無效"的敘述*/
+    /**含有"此效果不會被無效"的敘述*/
     CANNOT_NEGATE = 0x0200,
-	/**不会被无效*/
+    /**不会被无效*/
     CANNOT_DISABLE = 0x0400,
-	/**以玩家为对象*/
+    /**以玩家为对象*/
     PLAYER_TARGET = 0x0800,
-	/**双方都能使用（部分场地，弹压）*/
+    /**双方都能使用（部分场地，弹压）*/
     BOTH_SIDE = 0x1000,
-	/**若由复制的效果產生則继承其Reset属性*/
+    /**若由复制的效果產生則继承其Reset属性*/
     COPY_INHERIT = 0x2000,
-	/**可以在伤害步骤发动*/
+    /**可以在伤害步骤发动*/
     DAMAGE_STEP = 0x4000,
-	/**可以在伤害计算时发动*/
+    /**可以在伤害计算时发动*/
     DAMAGE_CAL = 0x8000,
-	/**場合型誘發效果、用於永續效果的EFFECT_TYPE_CONTINUOUS、神之化身/恐惧之源的攻击力变化最后计算*/
+    /**場合型誘發效果、用於永續效果的EFFECT_TYPE_CONTINUOUS、神之化身/恐惧之源的攻击力变化最后计算*/
     DELAY = 0x10000,
-	/**只对自己有效*/
+    /**只对自己有效*/
     SINGLE_RANGE = 0x20000,
-	/**不能复制（效果外文本）*/
+    /**不能复制（效果外文本）*/
     UNCOPYABLE = 0x40000,
-	/**誓约效果*/
+    /**誓约效果*/
     OATH = 0x80000,
-	/**指定召喚/规则特殊召唤的位置和表示形式(熔岩魔神)*/
+    /**指定召喚/规则特殊召唤的位置和表示形式(熔岩魔神)*/
     SPSUM_PARAM = 0x100000,
-	/**神之化身的攻击力重复计算*/
+    /**神之化身的攻击力重复计算*/
     REPEAT = 0x200000,
-	/**发条等“这张卡在场上只能发动一次”的效果*/
+    /**发条等“这张卡在场上只能发动一次”的效果*/
     NO_TURN_RESET = 0x400000,
-	/**视为对方玩家的效果（动作？）*/
+    /**视为对方玩家的效果（动作？）*/
     EVENT_PLAYER = 0x800000,
-	/**持續成為對象*/
+    /**持續成為對象*/
     OWNER_RELATE = 0x1000000,
-	/**战斗破坏确定时效果也适用（纳祭之魔 地狱战士）*/
+    /**战斗破坏确定时效果也适用（纳祭之魔 地狱战士）*/
     CANNOT_INACTIVATE = 0x2000000,
-	/**客户端提示*/
+    /**客户端提示*/
     CLIENT_HINT = 0x4000000,
-	/**同一组连锁只能发动一次*/
+    /**同一组连锁只能发动一次*/
     CONTINUOUS_TARGET = 0x8000000,
-	/**N/A*/
+    /**N/A*/
     LIMIT_ZONE = 0x10000000,
-	/**N/A*/
-    // 	COF					= 0x20000000,
-	/**N/A*/
-    // 	CVAL_CHECK			= 0x40000000,
-	/**卡在发动时效果就立即适用（卡通王國）*/
+    /**N/A*/
+    // 	COF	= 0x20000000,
+    /**N/A*/
+    // 	CVAL_CHECK	= 0x40000000,
+    /**卡在发动时效果就立即适用（卡通王國）*/
     IMMEDIATELY_APPLY = 0x80000000,
 }
 declare enum EFFECT_FLAG2 {
     /**特殊情况时发动不会被无效（神卡纳迦的特殊处理）*/
-    // 	NAGA				= 0x0001,
+    // 	NAGA= 0x0001,
     /**通常魔法卡在MP1以外发动（邪恶的仪式的特殊处理）*/
     COF = 0x0002,
 }
+/** 卡片当前状态*/
+declare enum STATUS {
+    /**效果被无效*/
+    DISABLED = 0x0001,
+    /**将变成有效*/
+    TO_ENABLE = 0x0002,
+    /**将变成无效*/
+    TO_DISABLE = 0x0004,
+    /**完成正规召唤（解除苏生限制）*/
+    PROC_COMPLETE = 0x0008,
+    /**在本回合覆盖*/
+    SET_TURN = 0x0010,
+    /**无等级*/
+    NO_LEVEL = 0x0020,
+    /**傷害計算結果預計要破壞的怪獸*/
+    BATTLE_RESULT = 0x0040,
+    /**效果特召處理中*/
+    SPSUMMON_STEP = 0x0080,
+    /**改变过表示形式*/
+    FORM_CHANGED = 0x0100,
+    /**召唤中*/
+    SUMMONING = 0x0200,
+    /**卡片準備就緒(不在移動、召喚、魔法陷阱發動中)*/
+    EFFECT_ENABLED = 0x0400,
+    /**在本回合召喚/SET*/
+    SUMMON_TURN = 0x0800,
+    /**破坏确定*/
+    DESTROY_CONFIRMED = 0x1000,
+    /**連鎖處理完後送去墓地的魔法陷阱*/
+    LEAVE_CONFIRMED = 0x2000,
+    /**战斗破坏确定後尚未移動*/
+    BATTLE_DESTROYED = 0x4000,
+    /**复制效果*/
+    COPYING_EFFECT = 0x8000,
+    /**正在連鎖串中*/
+    CHAINING = 0x10000,
+    /**召唤无效後尚未移動*/
+    SUMMON_DISABLED = 0x20000,
+    /**发动无效後尚未移動*/
+    ACTIVATE_DISABLED = 0x40000,
+    /**效果被替代(红莲霸权)*/
+    EFFECT_REPLACED = 0x80000,
+    /**未来融合特殊召唤(不触发融合素材效果)*/
+    FUTURE_FUSION = 0x100000,
+    /**若其為攻擊者，則攻擊中止*/
+    ATTACK_CANCELED = 0x200000,
+    /**初始化..*/
+    INITIALIZING = 0x400000,
+    /**魔法陷阱卡发动過*/
+    ACTIVATED = 0x800000,
+    /**已改變表示形式(用於CONTINUOUS_POS判定)*/
+    JUST_POS = 0x1000000,
+    /**改變後再次設定成其他表示形式*/
+    CONTINUOUS_POS = 0x2000000,
+    /**不能play*/
+    FORBIDDEN = 0x4000000,
+    /**從手牌发动*/
+    ACT_FROM_HAND = 0x8000000,
+    /**和對手的怪兽戰鬥*/
+    OPPO_BATTLE = 0x10000000,
+    /**在本回合反转召唤*/
+    FLIP_SUMMON_TURN = 0x20000000,
+    /**在本回合特殊召唤*/
+    SPSUMMON_TURN = 0x40000000
+}
 
 
+declare enum POS {
+    /**表侧攻击*/
+    FACEUP_ATTACK = 0x1,
+    /**里侧攻击*/
+    FACEDOWN_ATTACK = 0x2,
+    /**表侧守备*/
+    FACEUP_DEFENSE = 0x4,
+    /**里侧守备*/
+    FACEDOWN_DEFENSE = 0x8,
+    /**正面表示*/
+    FACEUP = 0x5,
+    /**背面表示*/
+    FACEDOWN = 0xa,
+    /**攻击表示*/
+    ATTACK = 0x3,
+    /**守备表示*/
+    DEFENSE = 0xc,
+}
