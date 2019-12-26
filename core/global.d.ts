@@ -683,59 +683,112 @@ declare enum RESET {
     MSCHANGE = 0x08000000,
 
 }
+/**
+ * 效果类型分类，用于总结effect_code
+ */
 declare enum EFFECT_TYPE {
-    SINGLE = 0x0001, //一般效果
-    FIELD = 0x0002, //环境卡类效果
-    EQUIP = 0x0004, //装备卡类效果
-    ACTIONS = 0x0008, //通过某种行为触发的诱发类效果
+    /**自己状态变化时触发*/
+    SINGLE = 0x0001, //
+    /**场上所有卡状态变化时触发*/
+    FIELD = 0x0002, //
+    /**装备效果*/
+    EQUIP = 0x0004, //
+    /**触发型，以下類型會自動添加此屬性（对峙的G）*/
+    ACTIONS = 0x0008, //
+    /**魔陷发动*/
     ACTIVATE = 0x0010, //
+    /**翻转效果*/
     FLIP = 0x0020, //
+    /**起动效果*/
     IGNITION = 0x0040, //
+    /**诱发选发效果*/
     TRIGGER_O = 0x0080, //
+    /**诱发即时效果*/
     QUICK_O = 0x0100, //
+    /**诱发必发效果*/
     TRIGGER_F = 0x0200, //
+    /**诱发即时必发效果（熊猫龙等）*/
     QUICK_F = 0x0400, //
+    /**由事件觸發的輔助用效果/永續效果*/
     CONTINUOUS = 0x0800, //
+    /**作为超量素材时超量怪兽获得的效果（十二兽）*/
     XMATERIAL = 0x1000, //
+    /**使其他卡片获得效果（天气模样）*/
     GRANT = 0x2000, //
 }
-
+/**
+ * 效果的特殊性质
+ */
 declare enum EFFECT_FLAG {
+	/**可以发动的*/
     INITIAL = 0x0001,
+	/**此效果的Value属性是函数*/
     FUNC_VALUE = 0x0002,
+	/**发动次数限制*/
     COUNT_LIMIT = 0x0004,
+	/**此效果是注册给全局环境的*/
     FIELD_ONLY = 0x0008,
+	/**取对象效果*/
     CARD_TARGET = 0x0010,
+	/**影响所有区域的卡（禁止令 大宇宙 王宫的铁壁）*/
     IGNORE_RANGE = 0x0020,
+	/**Target Range不会因为控制权的改变而改变*/
     ABSOLUTE_TARGET = 0x0040,
+	/**无视效果免疫*/
     IGNORE_IMMUNE = 0x0080,
+	/**影响场上里侧的卡/裡側狀態可發動*/
     SET_AVAILABLE = 0x0100,
+	/**含有"此效果不會被無效"的敘述*/
     CANNOT_NEGATE = 0x0200,
+	/**不会被无效*/
     CANNOT_DISABLE = 0x0400,
+	/**以玩家为对象*/
     PLAYER_TARGET = 0x0800,
+	/**双方都能使用（部分场地，弹压）*/
     BOTH_SIDE = 0x1000,
+	/**若由复制的效果產生則继承其Reset属性*/
     COPY_INHERIT = 0x2000,
+	/**可以在伤害步骤发动*/
     DAMAGE_STEP = 0x4000,
+	/**可以在伤害计算时发动*/
     DAMAGE_CAL = 0x8000,
+	/**場合型誘發效果、用於永續效果的EFFECT_TYPE_CONTINUOUS、神之化身/恐惧之源的攻击力变化最后计算*/
     DELAY = 0x10000,
+	/**只对自己有效*/
     SINGLE_RANGE = 0x20000,
+	/**不能复制（效果外文本）*/
     UNCOPYABLE = 0x40000,
+	/**誓约效果*/
     OATH = 0x80000,
+	/**指定召喚/规则特殊召唤的位置和表示形式(熔岩魔神)*/
     SPSUM_PARAM = 0x100000,
+	/**神之化身的攻击力重复计算*/
     REPEAT = 0x200000,
+	/**发条等“这张卡在场上只能发动一次”的效果*/
     NO_TURN_RESET = 0x400000,
+	/**视为对方玩家的效果（动作？）*/
     EVENT_PLAYER = 0x800000,
+	/**持續成為對象*/
     OWNER_RELATE = 0x1000000,
+	/**战斗破坏确定时效果也适用（纳祭之魔 地狱战士）*/
     CANNOT_INACTIVATE = 0x2000000,
+	/**客户端提示*/
     CLIENT_HINT = 0x4000000,
+	/**同一组连锁只能发动一次*/
     CONTINUOUS_TARGET = 0x8000000,
+	/**N/A*/
     LIMIT_ZONE = 0x10000000,
+	/**N/A*/
     // 	COF					= 0x20000000,
+	/**N/A*/
     // 	CVAL_CHECK			= 0x40000000,
+	/**卡在发动时效果就立即适用（卡通王國）*/
     IMMEDIATELY_APPLY = 0x80000000,
 }
 declare enum EFFECT_FLAG2 {
+    /**特殊情况时发动不会被无效（神卡纳迦的特殊处理）*/
     // 	NAGA				= 0x0001,
+    /**通常魔法卡在MP1以外发动（邪恶的仪式的特殊处理）*/
     COF = 0x0002,
 }
 
