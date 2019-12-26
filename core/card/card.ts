@@ -1,4 +1,3 @@
-import { PLAYER } from "../common";
 import Duel from "../duel";
 import { CardData } from "./CardData";
 import CardState from "./cardState";

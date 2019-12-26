@@ -1,5 +1,4 @@
 import { Card } from "../card/card";
-import { LOCATION } from "../common";
 export class Chain {
     public static chainOperationSort(c1: Chain, c2: Chain): boolean {
         return c1.triggeringEffect.id < c2.triggeringEffect.id;

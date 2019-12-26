@@ -1,4 +1,3 @@
-import { LOCATION } from "../common";
 import { Card } from "./card";
 export default class CardState {
     public code: number;
