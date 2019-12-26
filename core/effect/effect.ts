@@ -36,7 +36,7 @@ export class Effect {
     public target: number;
     public value: number;
     public operation: number;
-    private owner: Card|undefined;
+    private owner: Card | undefined;
     private handler: Card | undefined;
     constructor(pd: Duel) {
         this.ref_handle = 0;
@@ -96,13 +96,37 @@ export class Effect {
         }
         return false;
     }
-    public is_can_be_forbidden(): number {
-
-        return 0;
+    /**
+     * 效果是否可以被禁发
+     */
+    public is_can_be_forbidden(): boolean {
+        const ctr = this.code & 0xf0000;
+        if (this.is_flag(EFFECT_FLAG.CANNOT_DISABLE) &&
+            !this.is_flag(EFFECT_FLAG.CANNOT_NEGATE)) {
+            return false;
+        }
+        if (this.code === EFFECT_CODE.CHANGE_CODE ||
+            ctr === EFFECT_CODE.COUNTER_PERMIT ||
+            ctr === EFFECT_CODE.COUNTER_LIMIT) {
+            return false;
+        }
+        return true;
     }
-    public is_available(): number {
+    /**
+     * 检测当前是否可以主动发动效果
+     * 一般是包括主动效果，环境卡，装备卡
+     * 通过时点，场地，是否被禁用，等因素判断
+     */
+    public is_available(): boolean {
+        // 检测是否为诱发类型效果
+        if (this.type & EFFECT_TYPE.ACTIONS) {
+            return false;
+        }
+        if ((this.type & (EFFECT_TYPE.SINGLE | EFFECT_TYPE.XMATERIAL)) &&
+            !(this.type & EFFECT_TYPE.FIELD)) {
 
-        return 0;
+        }
+        return false;
     }
     public check_count_limit(playerid: number): number {
 
@@ -177,13 +201,13 @@ export class Effect {
     public clone(): Effect {
         return this;
     }
-    public get_owner(): Card |undefined {
-        return this.owner ;
+    public get_owner(): Card | undefined {
+        return this.owner;
     }
     public get_owner_player(): number {
         return 0;
     }
-    public get_handler(): Card|undefined {
+    public get_handler(): Card | undefined {
         return this.handler;
 
     }
