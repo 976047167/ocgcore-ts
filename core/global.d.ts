@@ -17,6 +17,16 @@ declare enum LOCATION {
     OVERLAY = 0x80,
     /**场上（怪兽+魔陷）*/
     ONFIELD = 0x0c,
+    //Locations (for redirect) 若在重定向类效果中指定LOCATION_DECK则为弹回卡组顶部
+    /**弹回卡组底部*/
+    DECKBOT = 0x10001,
+    /**弹回卡组并洗牌*/
+    DECKSHF = 0x20001,
+    //Locations of spell cards
+    /**场地区*/
+    FZONE = 0x100,
+    /**灵摆区*/
+    PZONE = 0x200,
 }
 
 /** 表示哪个玩家 */
@@ -505,11 +515,11 @@ declare enum EFFECT_CODE {
     ADD_LINK_ATTRIBUTE = 356,
     /**用作连接素材时的种族*/
     ADD_LINK_RACE = 357,
-    /**N/A*/
+    /**手卡的连接素材*/
     EXTRA_LINK_MATERIAL = 358,
-    /**N/A*/
+    /**速攻魔法可以在盖放的回合发动*/
     QP_ACT_IN_SET_TURN = 359,
-    /**N/A*/
+    /**extra pendulum summon*/
     EXTRA_PENDULUM_SUMMON = 360,
     /**素材检测*/
     MATERIAL_LIMIT = 361,
@@ -788,7 +798,7 @@ declare enum EFFECT_FLAG {
     CLIENT_HINT = 0x4000000,
     /**同一组连锁只能发动一次*/
     CONTINUOUS_TARGET = 0x8000000,
-    /**N/A*/
+    /**限制魔法·陷阱卡发动时可以放置的区域*/
     LIMIT_ZONE = 0x10000000,
     /**N/A*/
     // 	COF	= 0x20000000,
@@ -870,6 +880,7 @@ declare enum STATUS {
 }
 
 
+/**表示形式 */
 declare enum POS {
     /**表侧攻击*/
     FACEUP_ATTACK = 0x1,
@@ -888,6 +899,7 @@ declare enum POS {
     /**守备表示*/
     DEFENSE = 0xc,
 }
+/**卡牌种类 */
 declare enum TYPE {
     /**怪兽卡*/
     MONSTER = 0x1,
@@ -940,6 +952,7 @@ declare enum TYPE {
     /**连接*/
     LINK = 0x4000000,
 }
+/**游戏阶段 */
 declare enum PHASE {
     /**抽卡阶段*/
     DRAW = 0x01,

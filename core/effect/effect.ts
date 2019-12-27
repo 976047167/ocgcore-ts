@@ -40,9 +40,15 @@ export class Effect {
     public status: number;
     public label: number[];
     public label_object: number;
+    /**
+     * 发动的具体条件检测,原本是lua层的回调函数的指针，待重构
+     */
     public condition: number;
     public cost: number;
     public target: number;
+    /**
+     * 发动的具体条件检测,原本是lua层的回调函数的指针，待重构
+     */
     public value: number;
     public operation: number;
     private owner: Card;
@@ -250,6 +256,18 @@ export class Effect {
                 }
             }
         }
+        if (!this.condition) {
+            return true;
+        }
+        // pduel->lua->add_param(this, PARAM_TYPE_EFFECT);
+        // int32 res = pduel->lua->check_condition(condition, 1);
+        // if(res) {
+        //     if(!(status & EFFECT_STATUS_AVAILABLE))
+        //         id = pduel->game_field->infos.field_id++;
+        //     status |= EFFECT_STATUS_AVAILABLE;
+        // } else
+        //     status &= ~EFFECT_STATUS_AVAILABLE;
+        // return res;
     }
     /**
      * 检查效果发动次数限制
@@ -310,19 +328,64 @@ export class Effect {
                 if (this.pduel.game_field.check_unique_onfield(this.handler, playerid, LOCATION.SZONE)) {
                     return false;
                 }
+                // 如果不是反击陷阱，那么战阶等时点是不能发动的
                 if (!(this.handler.is_type(TYPE.COUNTER))) {
                     if ((this.code <= EFFECT_CODE.EVENT_BE_BATTLE_TARGET || this.code >= EFFECT_CODE.EVENT_TOSS_DICE) &&
-                        this.pduel.game_field.infos.phase == PHASE_DAMAGE &&
+                        this.pduel.game_field.infos.phase == PHASE.DAMAGE &&
                         !this.is_flag(EFFECT_FLAG.DAMAGE_STEP) &&
                         !this.pduel.game_field.get_cteffect(this, playerid, false)) {
                         return false;
                     }
                     if ((this.code < EFFECT_CODE.EVENT_PRE_DAMAGE_CALCULATE || this.code > EFFECT_CODE.EVENT_PRE_BATTLE_DAMAGE) &&
-                        this.pduel.game_field.infos.phase == PHASE_DAMAGE_CAL &&
+                        this.pduel.game_field.infos.phase == PHASE.DAMAGE_CAL &&
                         !this.is_flag(EFFECT_FLAG.DAMAGE_CAL)
                         && !this.pduel.game_field.get_cteffect(this, playerid, false)) {
                         return false;
                     }
+                }
+                let zone = 0xff;
+                // 如果不是场地卡或者灵摆卡，但是效果本身要校验场地，那么value一般会有一个lua层的回调用来检测场地
+                // 结果会以一个int形式返回，用按位与的方式记录那些场地被占用
+                if (!(this.handler.is_type (TYPE.FIELD | TYPE.PENDULUM)) && this.is_flag(EFFECT_FLAG.LIMIT_ZONE)) {
+                    // lua层调用，待重构
+                    // pduel->lua->add_param(playerid, PARAM_TYPE_INT);
+                    // pduel->lua->add_param(e.event_cards , PARAM_TYPE_GROUP);
+                    // pduel->lua->add_param(e.event_player, PARAM_TYPE_INT);
+                    // pduel->lua->add_param(e.event_value, PARAM_TYPE_INT);
+                    // pduel->lua->add_param(e.reason_effect , PARAM_TYPE_EFFECT);
+                    // pduel->lua->add_param(e.reason, PARAM_TYPE_INT);
+                    // pduel->lua->add_param(e.reason_player, PARAM_TYPE_INT);
+                    // zone = get_value(7);
+                    if (!zone) {
+                        zone = 0xff;
+                    }
+                }
+
+                if (this.handler.current.location === LOCATION.SZONE) {
+                    if (this.handler.is_position(POS.FACEUP)) {
+                        return false;
+                    }
+                    if (this.handler.equiping_target) {
+                        return false;
+                    }
+                    if (!(this.handler.is_type(TYPE.FIELD | TYPE.PENDULUM)) &&
+                      this.is_flag(EFFECT_FLAG.LIMIT_ZONE) &&
+                      !(zone & ( this.handler.current.sequence))) {
+                        return false;
+                    }
+                } else {
+                    if (this.handler.is_type(TYPE.MONSTER)) {
+                        if (!this.handler.is_type( TYPE.PENDULUM)) {
+                            return false;
+                        }
+                        if (!this.pduel . game_field.is_location_useable(playerid, LOCATION.PZONE, 0)
+                            && !this.pduel.game_field.is_location_useable(playerid, LOCATION.PZONE, 1)) {
+                            return false;
+                        }
+                    } else if (!this.handler.is_type ( TYPE.FIELD)
+                        && this.pduel.game_field.get_useable_count(this.handler, playerid, LOCATION.SZONE, playerid, LOCATION_REASON.TOFIELD, zone) <= 0) {
+                        return false;
+ }
                 }
             }
 
@@ -368,7 +431,7 @@ export class Effect {
     public recharge() {
 
     }
-    public get_value(extraargs: number = 0): number {
+    public get_value(extra_args: number = 0): number {
         return 0;
     }
     // get_value(pcard:Card, extraargs:number = 0):number{
@@ -388,7 +451,7 @@ export class Effect {
 
     }
     public get_speed(): number {
-
+        return 1;
     }
     public clone(): Effect {
         return this;
