@@ -16,8 +16,17 @@ export class Effect {
     public range: number;
     public s_range: number;
     public o_range: number;
+    /**
+     * 效果剩余发动次数
+     */
     public count_limit: number;
+    /**
+     * 效果最多发动次数
+     */
     public count_limit_max: number;
+    /**
+     * 效果重置的次数
+     */
     public reset_count: number;
     public reset_flag: number;
     public count_code: number;
@@ -119,12 +128,12 @@ export class Effect {
      */
     public is_available(): boolean {
         // 检测是否为诱发类型效果
-        if (this.type & EFFECT_TYPE.ACTIONS) {
+        if (this.is_type(EFFECT_TYPE.ACTIONS) ) {
             return false;
         }
         //
-        if ((this.type & (EFFECT_TYPE.SINGLE | EFFECT_TYPE.XMATERIAL)) &&
-            !(this.type & EFFECT_TYPE.FIELD)) {
+        if ((this.is_type(EFFECT_TYPE.SINGLE | EFFECT_TYPE.XMATERIAL)) &&
+            !this.is_type ( EFFECT_TYPE.FIELD)) {
             const phandler = this.get_handler();
             const powner = this.get_owner();
             if (phandler.current.controler === PLAYER.NONE) {
@@ -165,7 +174,7 @@ export class Effect {
             }
         }
         //
-        if (this.type & EFFECT_TYPE.EQUIP) {
+        if (this.is_type(EFFECT_TYPE.EQUIP)) {
             if (this.handler.current.controler === PLAYER.NONE) {
                 return false;
             }
@@ -199,7 +208,7 @@ export class Effect {
             }
         }
         //
-        if (this.type & EFFECT_TYPE.FIELD) {
+        if (this.is_type(EFFECT_TYPE.FIELD)) {
             const phandler = this.get_handler();
             const powner = this.get_owner();
             if (!this.is_flag(EFFECT_FLAG.FIELD_ONLY)) {
@@ -242,27 +251,43 @@ export class Effect {
             }
         }
     }
+    /**
+     * 检查效果发动次数限制
+     * @param playerid 玩家id
+     */
     public check_count_limit(playerid: number): boolean {
         if (this.is_flag(EFFECT_FLAG.COUNT_LIMIT)) {
-            if (this.count_limit == 0) {
+            if (this.count_limit === 0) {
                 return false;
             }
             if (this.count_code) {
                 const code = this.count_code & 0xfffffff;
                 const count = this.count_limit_max;
-                if (code == 1) {
-                    if (pduel.game_field.get_effect_code((this.count_code & 0xf0000000) | get_handler() - > fieldid, PLAYER_NONE) >= count) {
-                        return FALSE;
+                if (code === 1) {
+                    if (this.pduel.game_field.get_effect_code((this.count_code & 0xf0000000) |
+                        this.get_handler().fieldid, PLAYER.NONE) >= count) {
+                        return false;
                     }
                 } else {
-                    if (pduel - > game_field - > get_effect_code(count_code, playerid) >= count) {
-                        return FALSE;
+                    if (this.pduel.game_field.get_effect_code(this.count_code, playerid) >= count) {
+                        return false;
                     }
                 }
             }
         }
-        return TRUE;
+        return true;
     }
+    /**
+     * 用来检测诱发型效果是否可以启动
+     * 比如通过flag来检测是否为伤害阶段，是否可以启动
+     * @param playerid 玩家id
+     * @param e
+     * @param neglect_cond
+     * @param neglect_cost
+     * @param neglect_target
+     * @param neglect_loc
+     * @param neglect_faceup
+     */
     public is_activateable(playerid: number,
                            e: TEvent,
                            neglect_cond: number = 0,
@@ -270,9 +295,34 @@ export class Effect {
                            neglect_target: number = 0,
                            neglect_loc: number = 0,
                            neglect_faceup: number = 0,
-    ): number {
+    ): boolean {
+        if (!this.is_type(EFFECT_TYPE.ACTIONS)) {
+            return false;
+        }
+        if (!this.check_count_limit(playerid)) {
+            return false;
+        }
+        if (!this.is_flag(EFFECT_FLAG.FIELD_ONLY)) {
+            if (this.is_type(EFFECT_TYPE.ACTIVATE)) {
+                if (this.handler.current.controler !== playerid) {
+                    return false;
+                }
+                if (this.pduel.game_field.check_unique_onfield(this.handler, playerid, LOCATION.SZONE)) {
+                    return false;
+                }
+                if (!(this.handler.is_type ( TYPE.COUNTER))) {
+                    if ((this.code < 1132 || this.code > 1149) && pduel - > game_field - > infos.phase == PHASE_DAMAGE && !is_flag(EFFECT_FLAG_DAMAGE_STEP)
+                        && !pduel - > game_field - > get_cteffect(this, playerid, FALSE)) {
+                        return FALSE;
+                    }
+                    if ((code < 1134 || code > 1136) && pduel - > game_field - > infos.phase == PHASE_DAMAGE_CAL && !is_flag(EFFECT_FLAG_DAMAGE_CAL)
+                        && !pduel - > game_field - > get_cteffect(this, playerid, FALSE)) {
+                        return FALSE;
+                    }
+                }
+            }
 
-        return 0;
+        }
     }
     public is_action_check(playerid: number): number {
         return 0;
@@ -343,7 +393,7 @@ export class Effect {
         if (this.active_handler) {
             return this.active_handler;
         }
-        if ((this.type & EFFECT_TYPE.XMATERIAL)) {
+        if (this.is_type(EFFECT_TYPE.XMATERIAL)) {
             return this.handler.overlay_target;
         }
         return this.owner;
@@ -355,7 +405,7 @@ export class Effect {
         if (this.active_handler) {
             return this.active_handler;
         }
-        if ((this.type & EFFECT_TYPE.XMATERIAL)) {
+        if (this.is_type( EFFECT_TYPE.XMATERIAL)) {
             return this.handler.overlay_target;
         }
         return this.handler;
@@ -365,7 +415,7 @@ export class Effect {
         return 0;
     }
     public in_range(p: Card | Chain): boolean {
-        if (this.type & EFFECT_TYPE.XMATERIAL) {
+        if (this.is_type( EFFECT_TYPE.XMATERIAL)) {
             return !!this.handler.overlay_target;
         }
         if (p instanceof Card) {
@@ -380,10 +430,25 @@ export class Effect {
     public get_active_type() {
         return 0;
     }
+    /**
+     * 校验本效果是否符合某个性质
+     * @param flag 性质flag
+     */
     public is_flag(flag: EFFECT_FLAG): boolean {
         return !!(this.flag[0] & flag);
     }
+    /**
+     * 校验本效果是否符合某个性质
+     * @param flag 性质flag
+     */
     public is_flag2(flag: EFFECT_FLAG2): boolean {
         return !!(this.flag[1] & flag);
+    }
+    /**
+     * 检测效果是否符合一类效果（选发，诱发等）
+     * @param type 效果类型
+     */
+    public is_type(type: EFFECT_TYPE): boolean {
+        return !!(this.type & type);
     }
 }

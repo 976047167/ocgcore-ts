@@ -1,21 +1,33 @@
 declare enum LOCATION {
-    DECK = 0x01, //卡组
-    HAND = 0x02, //手牌
-    MZONE = 0x04, //怪兽区
-    SZONE = 0x08, //魔陷区
-    GRAVE = 0x10, //墓地
-    REMOVED = 0x20, //除外区
-    EXTRA = 0x40, //额外
-    OVERLAY = 0x80, //超量素材
-    ONFIELD = 0x0c, //场上（怪兽+魔陷）
-    FZONE = 0x100, //场地区
-    PZONE = 0x200, //灵摆区
+    /**卡组*/
+    DECK = 0x01,
+    /**手牌*/
+    HAND = 0x02,
+    /**怪兽区*/
+    MZONE = 0x04,
+    /**魔陷区*/
+    SZONE = 0x08,
+    /**墓地*/
+    GRAVE = 0x10,
+    /**除外区*/
+    REMOVED = 0x20,
+    /**额外*/
+    EXTRA = 0x40,
+    /**超量素材*/
+    OVERLAY = 0x80,
+    /**场上（怪兽+魔陷）*/
+    ONFIELD = 0x0c,
 }
+
+/** 表示哪个玩家 */
 declare enum PLAYER {
-    NONE = 2,//2个玩家都不是,
-    ALL = 3,//2个玩家都是
+    /** 2个玩家都不是 */
+    NONE = 2,
+    /** 2个玩家都是 */
+    ALL = 3,
 }
-//对诱发型效果表示触发效果的事件/时点(EVENT开头)
+
+/** 对诱发型效果表示触发效果的事件/时点(EVENT开头) */
 declare enum EFFECT_CODE {
     /**效果免疫*/
     IMMUNE_EFFECT = 1,
@@ -875,4 +887,56 @@ declare enum POS {
     ATTACK = 0x3,
     /**守备表示*/
     DEFENSE = 0xc,
+}
+declare enum TYPE {
+    /**怪兽卡*/
+    MONSTER = 0x1,
+    /**魔法卡*/
+    SPELL = 0x2,
+    /**陷阱卡*/
+    TRAP = 0x4,
+    /**通常怪兽*/
+    NORMAL = 0x10,
+    /**效果*/
+    EFFECT = 0x20,
+    /**融合*/
+    FUSION = 0x40,
+    /**仪式*/
+    RITUAL = 0x80,
+    /**陷阱怪兽*/
+    TRAPMONSTER = 0x100,
+    /**灵魂*/
+    SPIRIT = 0x200,
+    /**同盟*/
+    UNION = 0x400,
+    /**二重*/
+    DUAL = 0x800,
+    /**调整*/
+    TUNER = 0x1000,
+    /**同调*/
+    SYNCHRO = 0x2000,
+    /**衍生物*/
+    TOKEN = 0x4000,
+    /**速攻*/
+    QUICKPLAY = 0x10000,
+    /**永续*/
+    CONTINUOUS = 0x20000,
+    /**装备*/
+    EQUIP = 0x40000,
+    /**场地*/
+    FIELD = 0x80000,
+    /**反击*/
+    COUNTER = 0x100000,
+    /**翻转*/
+    FLIP = 0x200000,
+    /**卡通*/
+    TOON = 0x400000,
+    /**超量*/
+    XYZ = 0x800000,
+    /**灵摆*/
+    PENDULUM = 0x1000000,
+    /**特殊召唤*/
+    SPSUMMON = 0x2000000,
+    /**连接*/
+    LINK = 0x4000000,
 }

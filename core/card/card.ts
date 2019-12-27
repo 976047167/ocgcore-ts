@@ -1,5 +1,4 @@
 import Duel from "../duel";
-import { CardData } from "./CardData";
 import CardState from "./cardState";
 import { CardSet } from "./cardType";
 export class Card {
@@ -9,6 +8,9 @@ export class Card {
     public ref_handle: number;
     public pduel: Duel;
     public owner: PLAYER;
+    /**
+     * 卡牌的基础信息
+     */
     public data: CardData;
     public previous: CardState;
     public temp: CardState;
@@ -101,7 +103,14 @@ export class Card {
         if ((this.status & status) === status) {
             return true;
         }
-        return true;
+        return false;
+    }
+    /**
+     * 判断卡片是否为某一种卡（怪兽，魔陷等）
+     * @param type 判断类型
+     */
+    public is_type(type: TYPE) {
+        return !!(this.data.type & type);
     }
 }
 
@@ -125,3 +134,17 @@ interface QueryCache {
     link_marker: number;
 }
 
+interface CardData {
+    code: number;
+    alias: number;
+    setcode: number;
+    type: TYPE;
+    level: number;
+    attribute: number;
+    race: number;
+    attack: number;
+    defense: number;
+    lscale: number;
+    rscale: number;
+    linkMarker: number;
+}
