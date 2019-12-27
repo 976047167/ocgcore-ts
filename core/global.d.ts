@@ -940,3 +940,25 @@ declare enum TYPE {
     /**连接*/
     LINK = 0x4000000,
 }
+declare enum PHASE {
+    /**抽卡阶段*/
+    DRAW = 0x01,
+    /**准备阶段*/
+    STANDBY = 0x02,
+    /**主要阶段1*/
+    MAIN1 = 0x04,
+    /**战斗阶段开始*/
+    BATTLE_START = 0x08,
+    /**战斗步驟*/
+    BATTLE_STEP = 0x10,
+    /**伤害步驟*/
+    DAMAGE = 0x20,
+    /**伤害计算时*/
+    DAMAGE_CAL = 0x40,
+    /**战斗阶段結束*/
+    BATTLE = 0x80,
+    /**主要阶段2*/
+    MAIN2 = 0x100,
+    /**结束阶段*/
+    END = 0x200,
+}

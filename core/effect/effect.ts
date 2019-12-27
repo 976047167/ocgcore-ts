@@ -128,12 +128,12 @@ export class Effect {
      */
     public is_available(): boolean {
         // 检测是否为诱发类型效果
-        if (this.is_type(EFFECT_TYPE.ACTIONS) ) {
+        if (this.is_type(EFFECT_TYPE.ACTIONS)) {
             return false;
         }
         //
         if ((this.is_type(EFFECT_TYPE.SINGLE | EFFECT_TYPE.XMATERIAL)) &&
-            !this.is_type ( EFFECT_TYPE.FIELD)) {
+            !this.is_type(EFFECT_TYPE.FIELD)) {
             const phandler = this.get_handler();
             const powner = this.get_owner();
             if (phandler.current.controler === PLAYER.NONE) {
@@ -310,14 +310,18 @@ export class Effect {
                 if (this.pduel.game_field.check_unique_onfield(this.handler, playerid, LOCATION.SZONE)) {
                     return false;
                 }
-                if (!(this.handler.is_type ( TYPE.COUNTER))) {
-                    if ((this.code < 1132 || this.code > 1149) && pduel - > game_field - > infos.phase == PHASE_DAMAGE && !is_flag(EFFECT_FLAG_DAMAGE_STEP)
-                        && !pduel - > game_field - > get_cteffect(this, playerid, FALSE)) {
-                        return FALSE;
+                if (!(this.handler.is_type(TYPE.COUNTER))) {
+                    if ((this.code <= EFFECT_CODE.EVENT_BE_BATTLE_TARGET || this.code >= EFFECT_CODE.EVENT_TOSS_DICE) &&
+                        this.pduel.game_field.infos.phase == PHASE_DAMAGE &&
+                        !this.is_flag(EFFECT_FLAG.DAMAGE_STEP) &&
+                        !this.pduel.game_field.get_cteffect(this, playerid, false)) {
+                        return false;
                     }
-                    if ((code < 1134 || code > 1136) && pduel - > game_field - > infos.phase == PHASE_DAMAGE_CAL && !is_flag(EFFECT_FLAG_DAMAGE_CAL)
-                        && !pduel - > game_field - > get_cteffect(this, playerid, FALSE)) {
-                        return FALSE;
+                    if ((this.code < EFFECT_CODE.EVENT_PRE_DAMAGE_CALCULATE || this.code > EFFECT_CODE.EVENT_PRE_BATTLE_DAMAGE) &&
+                        this.pduel.game_field.infos.phase == PHASE_DAMAGE_CAL &&
+                        !this.is_flag(EFFECT_FLAG.DAMAGE_CAL)
+                        && !this.pduel.game_field.get_cteffect(this, playerid, false)) {
+                        return false;
                     }
                 }
             }
@@ -405,7 +409,7 @@ export class Effect {
         if (this.active_handler) {
             return this.active_handler;
         }
-        if (this.is_type( EFFECT_TYPE.XMATERIAL)) {
+        if (this.is_type(EFFECT_TYPE.XMATERIAL)) {
             return this.handler.overlay_target;
         }
         return this.handler;
@@ -415,7 +419,7 @@ export class Effect {
         return 0;
     }
     public in_range(p: Card | Chain): boolean {
-        if (this.is_type( EFFECT_TYPE.XMATERIAL)) {
+        if (this.is_type(EFFECT_TYPE.XMATERIAL)) {
             return !!this.handler.overlay_target;
         }
         if (p instanceof Card) {
