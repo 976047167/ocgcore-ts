@@ -3,7 +3,7 @@ export default class CardState {
     public code: number;
     public code2: number;
     public setcode: number;
-    public type: number;
+    public type: TYPE;
     public level: number;
     public rank: number;
     public link: number;
@@ -20,11 +20,12 @@ export default class CardState {
     public sequence: number;
     public position: number;
     public reason: number;
-    public pzone: number;
+    public pzone: boolean;
     public reasonCard: Card;
     public reasonPlayer: number;
     public reasonEffect: any;
-    public isLocation(loc: LOCATION): boolean {
+    /** 判断当前状态是否位于某个区域 */
+    public is_location(loc: LOCATION): boolean {
         if ((loc & LOCATION.FZONE) && this.location === LOCATION.SZONE && this.sequence === 5) {
             return true;
         }

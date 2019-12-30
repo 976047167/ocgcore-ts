@@ -23,9 +23,9 @@ export class Chain {
     public flag: number;
     public setTriggeringState(pcard: Card) {
         this.triggeringControler = pcard.current.controler;
-        if (pcard.current.isLocation(LOCATION.FZONE)) {
+        if (pcard.current.is_location(LOCATION.FZONE)) {
             this.triggeringLocation = LOCATION.SZONE | LOCATION.FZONE;
-        } else if (pcard.current.isLocation(LOCATION.PZONE)) {
+        } else if (pcard.current.is_location(LOCATION.PZONE)) {
             this.triggeringLocation = LOCATION.SZONE | LOCATION.PZONE;
         } else {
             this.triggeringLocation = pcard.current.location;

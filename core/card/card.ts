@@ -44,7 +44,9 @@ export class Card {
     public spsummon_code: number;
     public spsummon_counter: number[];
     public spsummon_counter_rst: number[];
-    public assume_type: number;
+    /** 某种属性被视为什么时,这一个变量表示属性，assume_value表示被视为的值 */
+    public assume_type: ASSUME;
+    /** 某种属性被视为什么时,这一个变量表示被视为的值 */
     public assume_value: number;
     public equiping_target: Card | undefined;
     public pre_equip_target: Card | undefined;
@@ -152,6 +154,10 @@ export class Card {
         }
         return result;
     }
+    /**
+     * 判断是否受这个效果影响
+     * @param effect 被判断的效果
+     */
     public is_affect_by_effect(effect?: Effect) {
         if (this.is_status(STATUS.SUMMONING) &&
             effect.code !== EFFECT_CODE.CANNOT_DISABLE_SUMMON &&
@@ -166,11 +172,55 @@ export class Card {
         }
         return true;
     }
+    /**
+     * 判断是否已经遭受某一类code效果的影响
+     * @param code effect_code
+     */
     public is_affected_by_effect(code: EFFECT_CODE): Effect {
         const g = this.create_affected_effect_iterator(code);
         const effect = g.next().value;
         return effect || null;
     }
+    /**
+     * 获取当前卡片是什么卡
+     * 因为存在灵摆,古遗物之类在不同区域视为不同种类的卡
+     */
+    public get_type(): TYPE {
+        if (this.assume_type === ASSUME.TYPE) {
+            return this.assume_value;
+        }
+        if (!(this.current.is_location(LOCATION.ONFIELD | LOCATION.HAND | LOCATION.GRAVE))) {
+            return this.data.type;
+        }
+        if (this.current.is_location(LOCATION.PZONE)) {
+            return TYPE.PENDULUM + TYPE.SPELL;
+        }
+        if (this.temp.type !== 0xffffffff) {
+            return this.temp.type;
+        }
+        const effects: Effect[] = [];
+        let type = this.data.type;
+        this.temp.type = type;
+        effects.push(...this.filter_effect(EFFECT_CODE.ADD_TYPE));
+        effects.push(...this.filter_effect(EFFECT_CODE.REMOVE_TYPE));
+        effects.push(...this.filter_effect(EFFECT_CODE.CHANGE_TYPE));
+        for (const effect of effects) {
+            if (effect.code === EFFECT_CODE.ADD_TYPE) {
+                type |= effect.get_value(this);
+            } else if (effect.code === EFFECT_CODE.REMOVE_TYPE) {
+                type &= ~(effect.get_value(this));
+            } else {
+                type = effect.get_value(this);
+            }
+            this.temp.type = type;
+        }
+        this.temp.type = 0xffffffff;
+        return type;
+    }
+    /**
+     * 生成一个（遍历出本卡所受效果中所有符合code的效果 ）的迭代器
+     * @param code code
+     */
     private *create_affected_effect_iterator(code: EFFECT_CODE) {
         let rg = this.single_effect.filter((p) => p.code === code);
         for (const peffect of rg) {

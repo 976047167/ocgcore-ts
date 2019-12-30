@@ -1038,3 +1038,14 @@ declare enum REASON {
     /**用于连接召唤*/
     LINK = 0x10000000,
 }
+/**被视为某类卡使用时，比如灵摆被当做怪兽，或者当做魔法 */
+declare enum ASSUME {
+    CODE = 1,
+    TYPE = 2,
+    LEVEL = 3,
+    RANK = 4,
+    ATTRIBUTE = 5,
+    RACE = 6,
+    ATTACK = 7,
+    DEFENSE = 8,
+}

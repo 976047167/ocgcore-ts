@@ -428,10 +428,93 @@ export class Effect {
                 if (this.handler.is_affected_by_effect(EFFECT_CODE.CANNOT_TRIGGER)) {
                     return false;
                 }
-
+            } else if (!this.is_type(EFFECT_TYPE.CONTINUOUS)) {
+                const phandler = this.get_handler();
+                if (!(phandler.get_type() & TYPE.MONSTER) && (this.get_active_type() & TYPE.MONSTER)) {
+                    return false;
+                }
+                if (!neglect_faceup && (phandler.current.location & (LOCATION.ONFIELD | LOCATION.REMOVED))) {
+                    // effects which can be activated while face-down:
+                    // 1. effects with EFFECT_FLAG_SET_AVAILABLE
+                    // 2. events with FLIP_SET_AVAILABLE
+                    if (!phandler.is_position(POS.FACEUP) &&
+                        !this.is_flag(EFFECT_FLAG.SET_AVAILABLE) &&
+                        (this.code !== EFFECT_CODE.EVENT_FLIP || !(e.event_value & (FLIP_SET_AVAILABLE >> 16)))) {
+                        return false;
+                    }
+                    if (phandler.is_position(POS.FACEUP) && !phandler.is_status(STATUS.EFFECT_ENABLED)) {
+                        return false;
+                    }
+                }
+                if (!this.is_type(EFFECT_TYPE.FLIP | EFFECT_TYPE.TRIGGER_F)
+                    && !(this.is_type(EFFECT_TYPE.SINGLE) &&
+                        (this.code === EFFECT_CODE.EVENT_TO_GRAVE ||
+                            this.code === EFFECT_CODE.EVENT_DESTROYED ||
+                            this.code === EFFECT_CODE.EVENT_SPSUMMON_SUCCESS ||
+                            this.code === EFFECT_CODE.EVENT_TO_HAND ||
+                            this.code === EFFECT_CODE.EVENT_REMOVE ||
+                            this.code === EFFECT_CODE.EVENT_FLIP))) {
+                    if ((this.code < 1132 || this.code > 1149) &&
+                        this.pduel.game_field.infos.phase === PHASE.DAMAGE &&
+                        !this.is_flag(EFFECT_FLAG.DAMAGE_STEP)) {
+                        return false;
+                    }
+                    if ((this.code < 1134 || this.code > 1136) &&
+                        this.pduel.game_field.infos.phase === PHASE.DAMAGE_CAL &&
+                        !this.is_flag(EFFECT_FLAG.DAMAGE_CAL)) {
+                        return false;
+                    }
+                }
+                if (phandler.current.location === LOCATION.OVERLAY) {
+                    return false;
+                }
+                if (this.is_type(EFFECT_TYPE.FIELD) &&
+                    (phandler.current.controler !== playerid) &&
+                    !this.is_flag(EFFECT_FLAG.BOTH_SIDE | EFFECT_FLAG.EVENT_PLAYER)) {
+                    return false;
+                }
+                if (phandler.is_status(STATUS.FORBIDDEN)) {
+                    return false;
+                }
+                if (phandler.is_affected_by_effect(EFFECT_CODE.CANNOT_TRIGGER)) {
+                    return false;
+                }
+            } else {
+                const phandler = this.get_handler();
+                if (this.is_type(EFFECT_TYPE.FIELD) && phandler.is_status(STATUS.BATTLE_DESTROYED)) {
+                    return false;
+                }
+                if ((this.is_type(EFFECT_TYPE.FIELD) || (this.is_type(EFFECT_TYPE.SINGLE) && this.is_flag(EFFECT_FLAG.SINGLE_RANGE))) &&
+                 (phandler.current.is_location(LOCATION.ONFIELD))
+                    && (!phandler.is_position(POS.FACEUP) || !phandler.is_status(STATUS.EFFECT_ENABLED))
+                ) {
+                    return false;
+                }
+                if (this.is_type(EFFECT_TYPE.SINGLE) &&
+                this.is_flag(EFFECT_FLAG.SINGLE_RANGE) &&
+                 !this.in_range(phandler)) {
+                    return false;
+                }
+                if (this.is_flag(EFFECT_FLAG.OWNER_RELATE) && this.is_can_be_forbidden() && this.owner.is_status(STATUS.FORBIDDEN)) {
+                    return false;
+                }
+                if (phandler === this.owner && this.is_can_be_forbidden() && phandler.is_status(STATUS.FORBIDDEN)) {
+                    return false;
+                }
+                if (this.is_flag(EFFECT_FLAG.OWNER_RELATE) && !this.is_flag(EFFECT_FLAG.CANNOT_DISABLE) && this.owner.is_status(STATUS.DISABLED)) {
+                    return false;
+                }
+                if (phandler === this.owner && !this.is_flag(EFFECT_FLAG.CANNOT_DISABLE) && phandler.is_status(STATUS.DISABLED)) {
+                    return false;
+                }
             }
 
+        } else {
+            if ((this.get_owner_player() !== playerid) && !this.is_flag(EFFECT_FLAG.BOTH_SIDE)) {
+                return false;
+            }
         }
+
     }
     public is_action_check(playerid: number): number {
         return 0;
@@ -473,7 +556,7 @@ export class Effect {
     public recharge() {
 
     }
-    public get_value(extra_args: number = 0): number {
+    public get_value(extra_args: any = 0): number {
         return 0;
     }
     // get_value(pcard:Card, extraargs:number = 0):number{
@@ -528,7 +611,7 @@ export class Effect {
             return !!this.handler.overlay_target;
         }
         if (p instanceof Card) {
-            return p.current.isLocation(this.range);
+            return p.current.is_location(this.range);
 
         } else {
             return !!(this.range & p.triggeringLocation);

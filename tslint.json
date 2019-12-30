@@ -16,7 +16,8 @@
         "max-classes-per-file" : true,
         "object-literal-sort-keys":false,
         "no-empty":false,
-        "interface-name":false
+        "interface-name":false,
+        "max-line-length":false
     },
     "rulesDirectory": []
 }
