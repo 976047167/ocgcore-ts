@@ -975,3 +975,66 @@ declare enum PHASE {
     /**结束阶段*/
     END = 0x200,
 }
+declare enum LOCATION_REASON {
+    /**Duel.GetLocationCount()預設值,凱薩競技場*/
+    TOFIELD = 0x1,
+    /**Card.IsControlerCanBeChanged()使用*/
+    CONTROL = 0x2,
+}
+/**Reason 卡片到当前位置的原因*/
+declare enum REASON {
+    /**破坏*/
+    DESTROY = 0x1,
+    /**解放*/
+    RELEASE = 0x2,
+    /**暂时*/
+    TEMPORARY = 0x4,
+    /**作为融合/同调/超量素材或用於儀式/升級召喚*/
+    MATERIAL = 0x8,
+    /**召唤*/
+    SUMMON = 0x10,
+    /**战斗破坏*/
+    BATTLE = 0x20,
+    /**效果*/
+    EFFECT = 0x40,
+    /**用於代價或無法支付代價而破壞*/
+    COST = 0x80,
+    /**调整（御前试合）*/
+    ADJUST = 0x100,
+    /**失去装备对象（被破坏）/失去叠放对象（不是被破坏）*/
+    LOST_TARGET = 0x200,
+    /**规则*/
+    RULE = 0x400,
+    /**特殊召唤*/
+    PSUMMON = 0x800,
+    /**召唤失败*/
+    DISSUMMON = 0x1000,
+    /**翻转*/
+    FLIP = 0x2000,
+    /**丢弃*/
+    DISCARD = 0x4000,
+    /**回復轉換後的傷害*/
+    RDAMAGE = 0x8000,
+    /**傷害轉換後的回復*/
+    RRECOVER = 0x10000,
+    /**回到墓地*/
+    RETURN = 0x20000,
+    /**用於融合召喚*/
+    FUSION = 0x40000,
+    /**用於同调召喚*/
+    SYNCHRO = 0x80000,
+    /**用於仪式召喚*/
+    RITUAL = 0x100000,
+    /**用於超量召喚*/
+    XYZ = 0x200000,
+    /**代替*/
+    REPLACE = 0x1000000,
+    /**抽卡*/
+    DRAW = 0x2000000,
+    /**改变去向（大宇宙，带菌等）*/
+    REDIRECT = 0x4000000,
+    /**翻开卡组（森罗）*/
+    REVEAL = 0x8000000,
+    /**用于连接召唤*/
+    LINK = 0x10000000,
+}

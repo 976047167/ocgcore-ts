@@ -1,8 +1,9 @@
 import Duel from "../duel";
+import { Effect } from "../effect/effect";
 import CardState from "./cardState";
 import { CardSet } from "./cardType";
 export class Card {
-    public q_cache: QueryCache | undefined | null;
+    public q_cache: QueryCache;
     public current: CardState;
     public cardId: number;
     public ref_handle: number;
@@ -54,15 +55,15 @@ export class Card {
     // public attacker_map; public announced_cards;
     // public attacker_map; public attacked_cards;
     // public attacker_map; public battled_cards;
-    public equiping_cards: CardSet | undefined | null;
-    public material_cards: CardSet | undefined | null;
+    public equiping_cards: Card[];
+    public material_cards: Card[];
     public effect_target_owner: CardSet | undefined | null;
     public effect_target_cards: CardSet | undefined | null;
-    // public card_vector; public xyz_materials;
-    // public effect_container; public single_effect;
-    // public effect_container; public field_effect;
-    // public effect_container; public equip_effect;
-    // public effect_container; public xmaterial_effect;
+    public xyz_materials: Card[];
+    public single_effect: Effect[];
+    public field_effect: Effect[];
+    public equip_effect: Effect[];
+    public xmaterial_effect: Effect[];
     // public effect_indexer; public indexer;
     // public effect_relation; public relate_effect;
     // public effect_set_v; public immune_effect;
@@ -96,9 +97,17 @@ export class Card {
     public get_status(status: STATUS): STATUS {
         return this.status & status;
     }
+    /**
+     * 判断卡片是某一种显示状态（正面背面等）
+     * @param pos 显示状态
+     */
     public is_position(pos): boolean {
         return !!(this.current.position & pos);
     }
+    /**
+     * 判断卡片是否完全符合某一状态
+     * @param status 所要判断的的状态
+     */
     public is_status(status: STATUS): boolean {
         if ((this.status & status) === status) {
             return true;
@@ -111,6 +120,94 @@ export class Card {
      */
     public is_type(type: TYPE) {
         return !!(this.data.type & type);
+    }
+    /**
+     * 遍历出本卡所受效果中所有符合code的效果
+     * @param code 符合的code
+     * @param sort 结果排序方式
+     */
+    public filter_effect(code: EFFECT_CODE, sort?: (a: any, b: any) => number): Effect[] {
+        const result = [];
+        const g = this.create_affected_effect_iterator(code);
+        for (const effect of g) {
+            result.push(effect);
+        }
+        if (sort) {
+            result.sort(sort);
+        }
+        return result;
+    }
+    public filter_single_effect(code: EFFECT_CODE, sort?: (a: any, b: any) => number) {
+        const result = [];
+        const rg = this.single_effect.filter((p) => p.code === code);
+        rg.forEach((peffect) => {
+            if (peffect.is_available() &&
+                (!peffect.is_flag(EFFECT_FLAG.SINGLE_RANGE))) {
+                result.push(peffect);
+            }
+
+        });
+        if (sort) {
+            result.sort(sort);
+        }
+        return result;
+    }
+    public is_affect_by_effect(effect?: Effect) {
+        if (this.is_status(STATUS.SUMMONING) &&
+            effect.code !== EFFECT_CODE.CANNOT_DISABLE_SUMMON &&
+            effect.code !== EFFECT_CODE.CANNOT_DISABLE_SPSUMMON) {
+            return false;
+        }
+        if (!effect || effect.is_flag(EFFECT_FLAG.IGNORE_IMMUNE)) {
+            return false;
+        }
+        if (effect.is_immuned(this)) {
+            return false;
+        }
+        return true;
+    }
+    public is_affected_by_effect(code: EFFECT_CODE): Effect {
+        const g = this.create_affected_effect_iterator(code);
+        const effect = g.next().value;
+        return effect || null;
+    }
+    private *create_affected_effect_iterator(code: EFFECT_CODE) {
+        let rg = this.single_effect.filter((p) => p.code === code);
+        for (const peffect of rg) {
+            if (peffect.is_available() &&
+                (!peffect.is_flag(EFFECT_FLAG.SINGLE_RANGE) || this.is_affect_by_effect(peffect))) {
+                yield peffect;
+            }
+        }
+        for (const card of this.equiping_cards) {
+            rg = card.equip_effect.filter((p) => p.code === code);
+            for (const peffect of rg) {
+                if (peffect.is_available() && this.is_affect_by_effect(peffect)) {
+                    yield peffect;
+                }
+            }
+
+        }
+        for (const card of this.xyz_materials) {
+            rg = card.xmaterial_effect.filter((p) => p.code === code);
+            for (const peffect of rg) {
+                if (peffect.is_type(EFFECT_TYPE.FIELD)) {
+                    return;
+                }
+                if (peffect.is_available() && this.is_affect_by_effect(peffect)) {
+                    yield peffect;
+                }
+            }
+        }
+        rg = this.pduel.game_field.effects.aura_effect.filter((p) => p.code === code);
+        for (const peffect of rg) {
+            if (peffect.is_flag(EFFECT_FLAG.PLAYER_TARGET) &&
+                peffect.is_available() &&
+                peffect.is_target(this) &&
+                this.is_affect_by_effect(peffect)) {
+                yield peffect;
+            }
+        }
     }
 }
 

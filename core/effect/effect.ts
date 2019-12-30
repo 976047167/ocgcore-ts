@@ -346,7 +346,7 @@ export class Effect {
                 let zone = 0xff;
                 // 如果不是场地卡或者灵摆卡，但是效果本身要校验场地，那么value一般会有一个lua层的回调用来检测场地
                 // 结果会以一个int形式返回，用按位与的方式记录那些场地被占用
-                if (!(this.handler.is_type (TYPE.FIELD | TYPE.PENDULUM)) && this.is_flag(EFFECT_FLAG.LIMIT_ZONE)) {
+                if (!(this.handler.is_type(TYPE.FIELD | TYPE.PENDULUM)) && this.is_flag(EFFECT_FLAG.LIMIT_ZONE)) {
                     // lua层调用，待重构
                     // pduel->lua->add_param(playerid, PARAM_TYPE_INT);
                     // pduel->lua->add_param(e.event_cards , PARAM_TYPE_GROUP);
@@ -369,24 +369,66 @@ export class Effect {
                         return false;
                     }
                     if (!(this.handler.is_type(TYPE.FIELD | TYPE.PENDULUM)) &&
-                      this.is_flag(EFFECT_FLAG.LIMIT_ZONE) &&
-                      !(zone & ( this.handler.current.sequence))) {
+                        this.is_flag(EFFECT_FLAG.LIMIT_ZONE) &&
+                        !(zone & (1 << this.handler.current.sequence))) {
                         return false;
                     }
                 } else {
                     if (this.handler.is_type(TYPE.MONSTER)) {
-                        if (!this.handler.is_type( TYPE.PENDULUM)) {
+                        if (!this.handler.is_type(TYPE.PENDULUM)) {
                             return false;
                         }
-                        if (!this.pduel . game_field.is_location_useable(playerid, LOCATION.PZONE, 0)
+                        if (!this.pduel.game_field.is_location_useable(playerid, LOCATION.PZONE, 0)
                             && !this.pduel.game_field.is_location_useable(playerid, LOCATION.PZONE, 1)) {
                             return false;
                         }
-                    } else if (!this.handler.is_type ( TYPE.FIELD)
+                    } else if (!this.handler.is_type(TYPE.FIELD)
                         && this.pduel.game_field.get_useable_count(this.handler, playerid, LOCATION.SZONE, playerid, LOCATION_REASON.TOFIELD, zone) <= 0) {
                         return false;
- }
+                    }
                 }
+                // 检测是否从手牌中发动或者从盖卡状态下发动
+                let ecode: EFFECT_CODE = 0;
+                if (this.handler.current.location == LOCATION.HAND && !neglect_loc) {
+                    if (this.handler.is_type(TYPE.TRAP)) {
+                        ecode = EFFECT_CODE.TRAP_ACT_IN_HAND;
+                    } else if (this.handler.is_type(TYPE.SPELL) && this.pduel.game_field.infos.turn_player != playerid) {
+                        if (this.handler.is_type(TYPE.QUICKPLAY)) {
+                            ecode = EFFECT_CODE.QP_ACT_IN_NTPHAND;
+                        } else {
+                            return false;
+                        }
+                    }
+                } else if (this.handler.current.location === LOCATION.SZONE) {
+                    if (this.handler.is_type(TYPE.TRAP) && this.handler.get_status(STATUS.SET_TURN)) {
+                        ecode = EFFECT_CODE.TRAP_ACT_IN_SET_TURN;
+                    }
+                    if (this.handler.is_type(TYPE.SPELL) &&
+                        this.handler.is_type(TYPE.QUICKPLAY) &&
+                        this.handler.get_status(STATUS.SET_TURN)) {
+                        ecode = EFFECT_CODE.QP_ACT_IN_SET_TURN;
+                    }
+                }
+                if (ecode) {
+                    let available = false;
+                    const eset = this.handler.filter_effect(ecode);
+                    for (let i = 0; i < eset.length; ++i) {
+                        if (eset[i].check_count_limit(playerid)) {
+                            available = true;
+                            break;
+                        }
+                    }
+                    if (!available) {
+                        return false;
+                    }
+                }
+                if (this.handler.is_status(STATUS.FORBIDDEN)) {
+                    return false;
+                }
+                if (this.handler.is_affected_by_effect(EFFECT_CODE.CANNOT_TRIGGER)) {
+                    return false;
+                }
+
             }
 
         }
