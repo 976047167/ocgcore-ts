@@ -129,11 +129,12 @@ export class Card {
      * @param sort 结果排序方式
      */
     public filter_effect(code: EFFECT_CODE, sort?: (a: any, b: any) => number): Effect[] {
-        const result = [];
+        const eset = new Set<Effect>();
         const g = this.create_affected_effect_iterator(code);
         for (const effect of g) {
-            result.push(effect);
+            eset.add(effect);
         }
+        const result  = Array.from<Effect>(eset);
         if (sort) {
             result.sort(sort);
         }

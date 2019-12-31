@@ -1,7 +1,7 @@
 import { Card } from "../card/card";
 import Duel from "../duel";
 import { Chain } from "../field/chain";
-import { TEvent } from "../field/tevent";
+import { tevent } from "../field/interface";
 
 export class Effect {
     public ref_handle: number;
@@ -307,7 +307,7 @@ export class Effect {
      * @param neglect_faceup
      */
     public is_activateable(playerid: number,
-                           e: TEvent,
+                           e: tevent,
                            neglect_cond: number = 0,
                            neglect_cost: number = 0,
                            neglect_target: number = 0,
@@ -508,24 +508,39 @@ export class Effect {
                     return false;
                 }
             }
-
         } else {
             if ((this.get_owner_player() !== playerid) && !this.is_flag(EFFECT_FLAG.BOTH_SIDE)) {
                 return false;
             }
         }
+        this.pduel.game_field.save_lp_cost();
+        const oreason: Effect = this.pduel.game_field.core.reason_effect;
+        const op = this.pduel.game_field.core.reason_player;
+        this.pduel.game_field.core.reason_effect = this;
+        this.pduel.game_field.core.reason_player = playerid;
+        let result = true;
+        if (!this.is_type(EFFECT_TYPE.CONTINUOUS)) {
+            result = !!this.is_action_check(playerid);
+        }
+        if (result) {
+            result = !!this.is_activate_ready(playerid, e, neglect_cond, neglect_cost, neglect_target);
+        }
+        this.pduel.game_field.core.reason_effect = oreason;
+        this.pduel.game_field.core.reason_player = op;
+        this.pduel.game_field.restore_lp_cost();
+        return result;
 
     }
     public is_action_check(playerid: number): number {
         return 0;
     }
-    public is_activate_ready(playerid: number, e: TEvent, neglect_cond: number = 0, neglect_cost: number = 0, neglect_target: number = 0) {
+    public is_activate_ready(playerid: number, e: tevent, neglect_cond: number = 0, neglect_cost: number = 0, neglect_target: number = 0) {
         return 0;
     }
-    public is_condition_check(playerid: number, e: TEvent): number {
+    public is_condition_check(playerid: number, e: tevent): number {
         return 0;
     }
-    public is_activate_check(playerid: number, e: TEvent, neglect_cond: number = 0, neglect_cost: number = 0, neglect_target: number = 0) {
+    public is_activate_check(playerid: number, e: tevent, neglect_cond: number = 0, neglect_cost: number = 0, neglect_target: number = 0) {
         return 0;
     }
     public is_target(pcard: Card): number {
